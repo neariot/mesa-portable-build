@@ -13,9 +13,9 @@ RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.3
     pip3 install meson && \
     ln -sf /usr/bin/ninja-build /usr/local/bin/ninja
 
-ENV CC=/opt/rh/devtoolset-9/root/usr/bin/gcc
-ENV CXX=/opt/rh/devtoolset-9/root/usr/bin/g++
-ENV PATH=/opt/rh/devtoolset-9/root/usr/bin:/usr/local/bin:$PATH
+ENV CC=/opt/rh/devtoolset-10/root/usr/bin/gcc
+ENV CXX=/opt/rh/devtoolset-10/root/usr/bin/g++
+ENV PATH=/opt/rh/devtoolset-10/root/usr/bin:/usr/local/bin:$PATH
 
 WORKDIR /build
 
