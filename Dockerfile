@@ -3,7 +3,7 @@ FROM quay.io/pypa/manylinux2014_x86_64
 RUN yum install -y epel-release && \
     yum install -y cmake3 ninja-build python3-pip \
         pkgconfig expat-devel zlib-devel libdrm-devel \
-        wget xz patchelf && \
+        wget xz patchelf flex bison && \
     yum clean all
 
 # Install newer cmake (manylinux has old 3.17)
