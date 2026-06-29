@@ -35,7 +35,6 @@ RUN wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.
         -DLLVM_INCLUDE_EXAMPLES=OFF \
         -DLLVM_INCLUDE_DOCS=OFF \
         -DLLVM_BUILD_LLVM_DYLIB=OFF \
-        -DLLVM_BUILD_STATIC=ON \
         -DBUILD_SHARED_LIBS=OFF \
         -DLLVM_ENABLE_PIC=ON \
         -DLLVM_ENABLE_EH=ON \
