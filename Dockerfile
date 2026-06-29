@@ -10,8 +10,6 @@ RUN yum install -y epel-release && \
 RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz && \
     tar xzf cmake-3.31.6-linux-x86_64.tar.gz -C /usr/local --strip-components=1 && \
     rm cmake-3.31.6-linux-x86_64.tar.gz && \
-    /opt/python/cp310-cp310/bin/pip install meson && \
-    ln -sf /opt/python/cp310-cp310/bin/meson /usr/local/bin/meson && \
     ln -sf /usr/bin/ninja-build /usr/local/bin/ninja
 
 ENV CC=/opt/rh/devtoolset-10/root/usr/bin/gcc
@@ -42,6 +40,10 @@ RUN wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.
         -DLLVM_ENABLE_RTTI=ON && \
     ninja -j$(nproc) install && \
     cd /build && rm -rf llvm-build llvm-project-18.1.8.src llvm-project-18.1.8.src.tar.xz
+
+# Install modern Meson (Mesa 24.3.4 requires Meson >= 1.1.0)
+RUN /opt/python/cp310-cp310/bin/pip install meson && \
+    ln -sf /opt/python/cp310-cp310/bin/meson /usr/local/bin/meson
 
 # Build Mesa 24.3.4 with llvmpipe, OSMesa, surfaceless EGL
 RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
