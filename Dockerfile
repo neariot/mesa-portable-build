@@ -4,7 +4,8 @@ RUN yum install -y epel-release && \
     yum install -y cmake3 ninja-build python3-pip \
         pkgconfig expat-devel zlib-devel libdrm-devel \
         wget xz patchelf flex bison \
-        libxshmfence-devel libX11-devel libXext-devel libXdamage-devel libXfixes-devel && \
+        libxshmfence-devel libX11-devel libXext-devel libXdamage-devel libXfixes-devel \
+        libXrandr-devel && \
     yum clean all
 
 # Install newer cmake (manylinux has old 3.17)
