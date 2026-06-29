@@ -66,7 +66,7 @@ RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
         -Dlmsensors=disabled \
         -Dvalgrind=disabled \
         -Dlibunwind=disabled \
-        -Dplatforms=x11,surfaceless \
+        -Dplatforms=x11 \
         -Ddri3=disabled \
         -Dshader-cache=disabled \
         -Dbuild-tests=false \
