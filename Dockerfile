@@ -6,7 +6,11 @@ RUN yum install -y epel-release && \
         wget xz patchelf && \
     yum clean all
 
-RUN pip3 install meson 'cmake>=3.20' && \
+# Install newer cmake (manylinux has old 3.17)
+RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz && \
+    tar xzf cmake-3.31.6-linux-x86_64.tar.gz -C /usr/local --strip-components=1 && \
+    rm cmake-3.31.6-linux-x86_64.tar.gz && \
+    pip3 install meson && \
     ln -sf /usr/bin/ninja-build /usr/local/bin/ninja
 
 ENV CC=/opt/rh/devtoolset-9/root/usr/bin/gcc
