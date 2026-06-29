@@ -14,7 +14,7 @@ RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.3
 
 ENV CC=/opt/rh/devtoolset-10/root/usr/bin/gcc
 ENV CXX=/opt/rh/devtoolset-10/root/usr/bin/g++
-ENV PATH=/opt/rh/devtoolset-10/root/usr/bin:/usr/local/bin:$PATH
+ENV PATH=/opt/rh/devtoolset-10/root/usr/bin:/usr/local/bin:/usr/local/llvm/bin:$PATH
 
 WORKDIR /build
 
@@ -42,14 +42,37 @@ RUN wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.
     cd /build && rm -rf llvm-build llvm-project-18.1.8.src llvm-project-18.1.8.src.tar.xz
 
 # Install modern Meson (Mesa 24.3.4 requires Meson >= 1.1.0)
-RUN /opt/python/cp310-cp310/bin/pip install meson && \
+RUN python3 -m pip install mako pyyaml && \
+    /opt/python/cp310-cp310/bin/pip install meson && \
     ln -sf /opt/python/cp310-cp310/bin/meson /usr/local/bin/meson
+
+# Build newer libdrm (Mesa 24.3.4 requires >= 2.4.109, CentOS 7 has 2.4.97)
+RUN wget -q https://dri.freedesktop.org/libdrm/libdrm-2.4.124.tar.xz && \
+    tar xf libdrm-2.4.124.tar.xz && \
+    mkdir libdrm-build && cd libdrm-build && \
+    meson setup ../libdrm-2.4.124 \
+        --prefix=/usr/local --libdir=lib --buildtype=release \
+        -Dudev=false \
+        -Dintel=disabled \
+        -Damdgpu=disabled \
+        -Dradeon=disabled \
+        -Dnouveau=disabled \
+        -Dvmwgfx=disabled \
+        -Detnaviv=disabled \
+        -Dexynos=disabled \
+        -Dfreedreno=disabled \
+        -Domap=disabled \
+        -Dtegra=disabled \
+        -Dvc4=disabled \
+        -Dtests=false && \
+    ninja -j$(nproc) install && \
+    cd /build && rm -rf libdrm-build libdrm-2.4.124 libdrm-2.4.124.tar.xz
 
 # Build Mesa 24.3.4 with llvmpipe, OSMesa, surfaceless EGL
 RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
     tar xf mesa-24.3.4.tar.xz && \
     mkdir mesa-build && cd mesa-build && \
-    export PKG_CONFIG_PATH=/usr/local/llvm/lib/pkgconfig && \
+    export PKG_CONFIG_PATH=/usr/local/llvm/lib/pkgconfig:/usr/local/lib/pkgconfig && \
     meson setup ../mesa-24.3.4 \
         --prefix=/usr/local/mesa --libdir=lib --buildtype=release \
         -Dgallium-drivers=swrast \
@@ -62,7 +85,7 @@ RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
         -Dgles2=disabled \
         -Dopengl=true \
         -Dllvm=enabled \
-        -Dshared-llvm=false \
+        -Dshared-llvm=disabled \
         -Dlmsensors=disabled \
         -Dvalgrind=disabled \
         -Dlibunwind=disabled \
