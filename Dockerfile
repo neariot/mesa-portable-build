@@ -10,7 +10,8 @@ RUN yum install -y epel-release && \
 RUN wget -q https://github.com/Kitware/CMake/releases/download/v3.31.6/cmake-3.31.6-linux-x86_64.tar.gz && \
     tar xzf cmake-3.31.6-linux-x86_64.tar.gz -C /usr/local --strip-components=1 && \
     rm cmake-3.31.6-linux-x86_64.tar.gz && \
-    pip3 install meson && \
+    /opt/python/cp310-cp310/bin/pip install meson && \
+    ln -sf /opt/python/cp310-cp310/bin/meson /usr/local/bin/meson && \
     ln -sf /usr/bin/ninja-build /usr/local/bin/ninja
 
 ENV CC=/opt/rh/devtoolset-10/root/usr/bin/gcc
