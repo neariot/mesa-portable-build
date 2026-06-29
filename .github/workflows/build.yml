@@ -1,0 +1,38 @@
+name: Build portable Mesa
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t mesa-portable .
+
+      - name: Extract libraries
+        run: |
+          mkdir -p /tmp/mesa-output
+          docker create --name mesa-tmp mesa-portable
+          docker cp mesa-tmp:/output/. /tmp/mesa-output/
+          docker rm mesa-tmp
+
+      - name: Show output
+        run: |
+          ls -lh /tmp/mesa-output/
+          echo "--- GLIBC deps ---"
+          for f in /tmp/mesa-output/*.so*; do
+            echo "$(basename $f): $(strings $f 2>/dev/null | grep -oP 'GLIBC_[0-9]+\.[0-9]+' | sort -V | tail -1)"
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mesa-portable-libs
+          path: /tmp/mesa-output/
+          compression-level: 9
+          retention-days: 90
