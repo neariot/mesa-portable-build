@@ -9,6 +9,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Inspect hardware
+        run: |
+          echo "=== CPU info ==="
+          nproc
+          lscpu | grep -E "Thread|Core|Socket|CPU\(s\)"
+          echo "=== Memory info ==="
+          free -h
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
