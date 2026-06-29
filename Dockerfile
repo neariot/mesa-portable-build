@@ -1,23 +1,9 @@
-FROM centos:7
-
-# Fix base repos to vault (EOL CentOS 7)
-RUN sed -i 's|mirror.centos.org|vault.centos.org|g' /etc/yum.repos.d/CentOS-Base.repo && \
-    sed -i 's|#baseurl=http://vault.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Base.repo && \
-    sed -i 's|mirrorlist=http://mirrorlist.centos.org|#mirrorlist=http://mirrorlist.centos.org|g' /etc/yum.repos.d/CentOS-Base.repo
-
-# Install SCL and fix its repo to vault too
-RUN yum install -y centos-release-scl && \
-    sed -i 's|mirror.centos.org|vault.centos.org|g' /etc/yum.repos.d/CentOS-SCLo-scl.repo /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo 2>/dev/null; \
-    sed -i 's|#baseurl=http://vault.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-SCLo-scl.repo /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo 2>/dev/null; \
-    sed -i 's|mirrorlist=http://mirrorlist.centos.org|#mirrorlist=http://mirrorlist.centos.org|g' /etc/yum.repos.d/CentOS-SCLo-scl.repo /etc/yum.repos.d/CentOS-SCLo-scl-rh.repo 2>/dev/null; \
-    yum install -y devtoolset-9-gcc devtoolset-9-gcc-c++ devtoolset-9-libstdc++-devel
+FROM quay.io/pypa/manylinux2014_x86_64
 
 RUN yum install -y epel-release && \
-    sed -i 's|^mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/epel.repo && \
-    sed -i 's|#baseurl=http://download.fedoraproject.org|baseurl=https://archives.fedoraproject.org/pub/archive/epel|g' /etc/yum.repos.d/epel.repo && \
-    yum install -y make cmake3 ninja-build python3 python3-pip python3-mako \
+    yum install -y cmake3 ninja-build python3-pip \
         pkgconfig expat-devel zlib-devel libdrm-devel \
-        wget xz which file patchelf && \
+        wget xz patchelf && \
     yum clean all
 
 RUN pip3 install meson && \
@@ -81,7 +67,7 @@ RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
         -Dtools=[] && \
     ninja -j$(nproc) install
 
-# Package portable libs with RPATH=$ORIGIN for relocatability
+# Package portable libs with RPATH=$ORIGIN
 RUN mkdir -p /output && \
     cp -av /usr/local/mesa/lib/libEGL*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/libOSMesa*.so* /output/ 2>/dev/null; \
