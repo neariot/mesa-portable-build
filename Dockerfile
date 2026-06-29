@@ -6,8 +6,7 @@ RUN yum install -y epel-release && \
         wget xz patchelf && \
     yum clean all
 
-RUN pip3 install meson && \
-    ln -sf /usr/bin/cmake3 /usr/local/bin/cmake && \
+RUN pip3 install meson 'cmake>=3.20' && \
     ln -sf /usr/bin/ninja-build /usr/local/bin/ninja
 
 ENV CC=/opt/rh/devtoolset-9/root/usr/bin/gcc
