@@ -20,10 +20,10 @@ ENV PATH=/opt/rh/devtoolset-10/root/usr/bin:/usr/local/bin:$PATH
 WORKDIR /build
 
 # Build LLVM 18.1.8 statically (X86 only)
-RUN wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-18.1.8.src.tar.xz && \
-    tar xf llvm-18.1.8.src.tar.xz && \
+RUN wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.8/llvm-project-18.1.8.src.tar.xz && \
+    tar xf llvm-project-18.1.8.src.tar.xz && \
     mkdir llvm-build && cd llvm-build && \
-    cmake ../llvm-18.1.8.src -G Ninja \
+    cmake ../llvm-project-18.1.8.src/llvm -G Ninja \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/usr/local/llvm \
         -DLLVM_ENABLE_TERMINFO=OFF \
@@ -51,7 +51,7 @@ RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
         --prefix=/usr/local/mesa --libdir=lib --buildtype=release \
         -Dgallium-drivers=swrast \
         -Dvulkan-drivers=[] \
-        -Dglx=disabled \
+        -Dglx=dri \
         -Degl=enabled \
         -Dgbm=disabled \
         -Dosmesa=true \
@@ -63,7 +63,7 @@ RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
         -Dlmsensors=disabled \
         -Dvalgrind=disabled \
         -Dlibunwind=disabled \
-        -Dplatforms=surfaceless \
+        -Dplatforms=x11,surfaceless \
         -Ddri3=disabled \
         -Dshader-cache=disabled \
         -Dbuild-tests=false \
@@ -71,21 +71,26 @@ RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
     ninja -j$(nproc) install
 
 # Package portable libs with RPATH=$ORIGIN
-RUN mkdir -p /output && \
+RUN mkdir -p /output/dri && \
+    cp -av /usr/local/mesa/lib/libGL*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/libEGL*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/libOSMesa*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/libgallium*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/libglapi*.so* /output/ 2>/dev/null; \
+    cp -av /usr/local/mesa/lib/dri/*.so /output/dri/ 2>/dev/null; \
     for f in /output/*.so*; do \
         patchelf --set-rpath '$ORIGIN' $f 2>/dev/null || true; \
     done; \
-    echo "=== Files ===" && ls -la /output/ && \
+    for f in /output/dri/*.so; do \
+        patchelf --set-rpath '$ORIGIN/..' $f 2>/dev/null || true; \
+    done; \
+    echo "=== Files ===" && ls -la /output/ && ls -la /output/dri/ && \
     echo "=== Missing deps ===" && \
-    for f in /output/*.so*; do \
+    for f in /output/*.so* /output/dri/*.so; do \
         miss=$(ldd $f 2>/dev/null | grep "not found"); \
         [ -n "$miss" ] && echo "--- $(basename $f) ---" && echo "$miss"; \
     done; \
     echo "=== GLIBC ===" && \
-    for f in /output/*.so*; do \
+    for f in /output/*.so* /output/dri/*.so; do \
         echo "$(basename $f): $(strings $f 2>/dev/null | grep -oP 'GLIBC_[0-9]+\.[0-9]+' | sort -V | tail -1)"; \
     done
