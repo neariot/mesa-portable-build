@@ -39,7 +39,8 @@ RUN wget -q https://github.com/llvm/llvm-project/releases/download/llvmorg-18.1.
         -DLLVM_ENABLE_PIC=ON \
         -DLLVM_ENABLE_EH=ON \
         -DLLVM_ENABLE_RTTI=ON && \
-    ninja -j$(nproc) install
+    ninja -j$(nproc) install && \
+    cd /build && rm -rf llvm-build llvm-project-18.1.8.src llvm-project-18.1.8.src.tar.xz
 
 # Build Mesa 24.3.4 with llvmpipe, OSMesa, surfaceless EGL
 RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
@@ -67,7 +68,8 @@ RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
         -Dshader-cache=disabled \
         -Dbuild-tests=false \
         -Dtools=[] && \
-    ninja -j$(nproc) install
+    ninja -j$(nproc) install && \
+    cd /build && rm -rf mesa-build mesa-24.3.4 mesa-24.3.4.tar.xz
 
 # Package portable libs with RPATH=$ORIGIN
 RUN mkdir -p /output/dri && \
