@@ -112,7 +112,7 @@ RUN mkdir -p /output/dri && \
     for lib in libX11 libXext libXfixes libXdamage libXrandr libXrender \
                libX11-xcb libXau libXdmcp libXxf86vm libXshmfence \
                libxcb libxcb-randr libxcb-xfixes libxcb-shm libxcb-dri3 \
-               libxcb-present libxcb-sync libxcb-glx libxcb-shape \
+               libxcb-present libxcb-sync libxcb-glx libxcb-shape libxshmfence \
                libXcursor libXcomposite libXi libXinerama \
                libexpat libz; do \
         cp -av /usr/lib64/$lib.so* /output/ 2>/dev/null; \
