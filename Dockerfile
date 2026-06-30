@@ -108,13 +108,16 @@ RUN mkdir -p /output/dri && \
     cp -av /usr/local/mesa/lib/dri/*.so /output/dri/ 2>/dev/null; \
     # Bundle libdrm (built from source, newer than system) \
     cp -av /usr/local/lib/libdrm.so* /output/ 2>/dev/null; \
-    # Bundle X11/XCB libs for full portability \
+    # Bundle ALL non-glibc dependencies for full portability \
     for lib in libX11 libXext libXfixes libXdamage libXrandr libXrender \
                libX11-xcb libXau libXdmcp libXxf86vm libXshmfence \
                libxcb libxcb-randr libxcb-xfixes libxcb-shm libxcb-dri3 \
-               libxcb-present libxcb-sync libxcb-glx; do \
+               libxcb-present libxcb-sync libxcb-glx libxcb-shape \
+               libXcursor libXcomposite libXi libXinerama \
+               libexpat libz; do \
         cp -av /usr/lib64/$lib.so* /output/ 2>/dev/null; \
     done; \
+    cp -av /usr/lib64/libstdc++.so* /output/ 2>/dev/null; \
     # Set RPATH to $ORIGIN for all libs \
     for f in /output/*.so*; do \
         patchelf --set-rpath '$ORIGIN' $f 2>/dev/null || true; \
