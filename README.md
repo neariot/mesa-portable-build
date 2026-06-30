@@ -12,13 +12,14 @@ compatibility with older HPC systems.
 - **libglapi.so** — GL API dispatch
 - **dri/swrast_dri.so** — Software rasterizer DRI driver (needed for GLX/EGL loading)
 - RPATH set to `$ORIGIN` (and `$ORIGIN/..` for DRI drivers) — all libs find each other in same directory structure
+- Bundled system deps: expat, zlib, libstdc++, libX11, libXext, libxcb, etc. — no host system dependencies needed
 
 ## Usage on HPC
 
-### Option A: Running under VNC / X11 (Virtual Desktop)
+### Option A: Running under VNC / X11 (requires `DISPLAY` with GLX support)
 ```bash
-# Extract the tarball
-tar xzf mesa-portable-libs.tar.gz -C /path/to/mesa
+# Extract the zip
+unzip mesa-portable-libs.zip -d /path/to/mesa
 
 # Set environment to use portable Mesa's GLX and software drivers
 export LD_LIBRARY_PATH=/path/to/mesa:$LD_LIBRARY_PATH
@@ -26,23 +27,20 @@ export LIBGL_DRIVERS_PATH=/path/to/mesa/dri
 export LIBGL_ALWAYS_SOFTWARE=1
 export GALLIUM_DRIVER=llvmpipe
 
-# Run your OpenGL application (it will use llvmpipe for software rendering over VNC)
+# Run your OpenGL application (will use llvmpipe for software rendering over VNC)
 /path/to/your/app
 ```
 
-### Option B: Headless / Surfaceless EGL (Off-screen rendering without VNC/X11)
+### Option B: Off-screen rendering with OSMesa (no X server needed)
 ```bash
-# Extract the tarball
-tar xzf mesa-portable-libs.tar.gz -C /path/to/mesa
+# Extract the zip
+unzip mesa-portable-libs.zip -d /path/to/mesa
 
 # Set environment
 export LD_LIBRARY_PATH=/path/to/mesa:$LD_LIBRARY_PATH
-export LIBGL_DRIVERS_PATH=/path/to/mesa/dri
-export LIBGL_ALWAYS_SOFTWARE=1
 export GALLIUM_DRIVER=llvmpipe
-export EGL_PLATFORM=surfaceless
 
-# Run your off-screen EGL application
+# Run your OSMesa-based application
 /path/to/your/app
 ```
 

@@ -70,7 +70,7 @@ RUN wget -q https://dri.freedesktop.org/libdrm/libdrm-2.4.124.tar.xz && \
     ninja -j$(nproc) install && \
     cd /build && rm -rf libdrm-build libdrm-2.4.124 libdrm-2.4.124.tar.xz
 
-# Build Mesa 24.3.4 with llvmpipe, OSMesa, surfaceless EGL
+# Build Mesa 24.3.4 with llvmpipe, OSMesa, EGL + GLX
 RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
     tar xf mesa-24.3.4.tar.xz && \
     mkdir mesa-build && cd mesa-build && \
