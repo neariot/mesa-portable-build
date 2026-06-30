@@ -106,9 +106,9 @@ RUN mkdir -p /output/dri && \
     cp -av /usr/local/mesa/lib/libgallium*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/libglapi*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/dri/*.so /output/dri/ 2>/dev/null; \
-    # Create DRI megadriver symlink for swrast (meson install_megadrivers.py doesn't always create it) \
-    ln -sf ../libgallium-24.3.4.so /output/dri/swrast_dri.so 2>/dev/null; \
-    ln -sf ../libgallium-24.3.4.so /output/dri/kms_swrast_dri.so 2>/dev/null; \
+    # Copy gallium DRI megadriver for GLX/EGL (symlinks not reliably preserved by artifact upload) \
+    cp -a /usr/local/mesa/lib/libgallium-24.3.4.so /output/dri/swrast_dri.so 2>/dev/null; \
+    cp -a /usr/local/mesa/lib/libgallium-24.3.4.so /output/dri/kms_swrast_dri.so 2>/dev/null; \
     # Bundle libdrm (built from source, newer than system) \
     cp -av /usr/local/lib/libdrm.so* /output/ 2>/dev/null; \
     # Bundle ALL non-glibc dependencies for full portability \
