@@ -98,7 +98,7 @@ RUN wget -q https://archive.mesa3d.org/mesa-24.3.4.tar.xz && \
     ninja -j$(nproc) install && \
     cd /build && rm -rf mesa-build mesa-24.3.4 mesa-24.3.4.tar.xz
 
-# Package portable libs with RPATH=$ORIGIN
+# Package portable libs with RPATH=$ORIGIN (fully self-contained)
 RUN mkdir -p /output/dri && \
     cp -av /usr/local/mesa/lib/libGL*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/libEGL*.so* /output/ 2>/dev/null; \
@@ -106,19 +106,30 @@ RUN mkdir -p /output/dri && \
     cp -av /usr/local/mesa/lib/libgallium*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/libglapi*.so* /output/ 2>/dev/null; \
     cp -av /usr/local/mesa/lib/dri/*.so /output/dri/ 2>/dev/null; \
+    # Bundle libdrm (built from source, newer than system) \
+    cp -av /usr/local/lib/libdrm.so* /output/ 2>/dev/null; \
+    # Bundle X11/XCB libs for full portability \
+    for lib in libX11 libXext libXfixes libXdamage libXrandr libXrender \
+               libX11-xcb libXau libXdmcp libXxf86vm libXshmfence \
+               libxcb libxcb-randr libxcb-xfixes libxcb-shm libxcb-dri3 \
+               libxcb-present libxcb-sync libxcb-glx; do \
+        cp -av /usr/lib64/$lib.so* /output/ 2>/dev/null; \
+    done; \
+    # Set RPATH to $ORIGIN for all libs \
     for f in /output/*.so*; do \
         patchelf --set-rpath '$ORIGIN' $f 2>/dev/null || true; \
     done; \
     for f in /output/dri/*.so; do \
         patchelf --set-rpath '$ORIGIN/..' $f 2>/dev/null || true; \
     done; \
-    echo "=== Files ===" && ls -la /output/ && ls -la /output/dri/ && \
+    echo "=== Files ===" && ls -la /output/ && echo "=== DRI ===" && ls -la /output/dri/ && \
     echo "=== Missing deps ===" && \
-    for f in /output/*.so* /output/dri/*.so; do \
+    for f in /output/libEGL.so.1.0.0 /output/libGL.so.1.2.0 /output/libOSMesa.so.8.0.0 /output/libgallium-24.3.4.so; do \
         miss=$(ldd $f 2>/dev/null | grep "not found"); \
         [ -n "$miss" ] && echo "--- $(basename $f) ---" && echo "$miss"; \
     done; \
     echo "=== GLIBC ===" && \
-    for f in /output/*.so* /output/dri/*.so; do \
+    for f in /output/libEGL.so.1.0.0 /output/libGL.so.1.2.0 /output/libOSMesa.so.8.0.0 /output/libgallium-24.3.4.so; do \
         echo "$(basename $f): $(strings $f 2>/dev/null | grep -oP 'GLIBC_[0-9]+\.[0-9]+' | sort -V | tail -1)"; \
-    done
+    done; \
+    echo "=== Total size ===" && du -sh /output/
